@@ -32,21 +32,21 @@ echo "Compiling HelloWorld.circom..."
 circom HelloWorld.circom --r1cs --wasm --sym -o HelloWorld
 
 # Display some information about the generated r1cs file using snarkjs
-snarkjs r1cs info HelloWorld/HelloWorld.r1cs
+npx snarkjs r1cs info HelloWorld/HelloWorld.r1cs
 
 # Start a new zkey file and make a contribution using snarkjs and the powersOfTau28_hez_final_10.ptau file
-snarkjs groth16 setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_0000.zkey
+npx snarkjs groth16 setup HelloWorld/HelloWorld.r1cs powersOfTau28_hez_final_10.ptau HelloWorld/circuit_0000.zkey
 
 # The --name flag specifies the name of the contributor
 # The -v flag enables verbose mode
 # The -e flag specifies the entropy source for the contribution
-snarkjs zkey contribute HelloWorld/circuit_0000.zkey HelloWorld/circuit_final.zkey --name="1st Contributor Name" -v -e="random text"
+npx snarkjs zkey contribute HelloWorld/circuit_0000.zkey HelloWorld/circuit_final.zkey --name="1st Contributor Name" -v -e="random text"
 
 # Export the verification key from the final zkey file as a JSON file using snarkjs
-snarkjs zkey export verificationkey HelloWorld/circuit_final.zkey HelloWorld/verification_key.json
+npx snarkjs zkey export verificationkey HelloWorld/circuit_final.zkey HelloWorld/verification_key.json
 
 # Generate a solidity contract for verifying proofs using the final zkey file and snarkjs
-snarkjs zkey export solidityverifier HelloWorld/circuit_final.zkey ../HelloWorldVerifier.sol
+npx snarkjs zkey export solidityverifier HelloWorld/circuit_final.zkey ../HelloWorldVerifier.sol
 
 # Go back to the root directory
 cd ../..
@@ -58,24 +58,24 @@ cd contracts/circuits/HelloWorld
 echo "Create inputs for HelloWorld circuit in HelloWorld_input.json"
 echo "{\"a\": \"3\", \"b\": \"11\"}" > ./HelloWorld_input.json
 
-# Calculate witness 
+# Calculate witness
 echo "Generate witness from HelloWorld_input.json, using HelloWorld.wasm, saving to HelloWorld_witness.wtns"
-gtime -f "[PROFILE] Witness generation time: %E" \
-    node HelloWorld_js/generate_witness.js HelloWorld_js/HelloWorld.wasm ./HelloWorld_input.json \
+echo "[PROFILE] Witness generation time: %E";
+    npx node HelloWorld_js/generate_witness.js HelloWorld_js/HelloWorld.wasm ./HelloWorld_input.json \
         HelloWorld_js/HelloWorld_witness.wtns
 
 # Create a proof for our witness
 echo "Starting proving that we have a witness (our HelloWorld_input.json in form of HelloWorld_witness.wtns)"
 echo "Proof and public signals are saved to HelloWorld_proof.json and HelloWorld_public.json"
-gtime -f "[PROFILE] Prove time: %E" \
-    snarkjs groth16 prove ./circuit_final.zkey HelloWorld_js/HelloWorld_witness.wtns \
+echo "[PROFILE] Prove time: %E";
+    npx snarkjs groth16 prove ./circuit_final.zkey HelloWorld_js/HelloWorld_witness.wtns \
         HelloWorld_js/HelloWorld_proof.json \
         HelloWorld_js/HelloWorld_public.json
 
 # Verify our proof
 echo "Checking proof of knowledge of private inputs for HelloWorld_public.json using HelloWorld_verification_key.json"
-gtime -f "[PROFILE] Verify time: %E" \
-    snarkjs groth16 verify ./verification_key.json \
+echo "[PROFILE] Verify time: %E";
+    npx snarkjs groth16 verify ./verification_key.json \
         HelloWorld_js/HelloWorld_public.json \
         HelloWorld_js/HelloWorld_proof.json
 

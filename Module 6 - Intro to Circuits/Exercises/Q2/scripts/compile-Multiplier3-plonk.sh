@@ -31,10 +31,10 @@ echo "Compiling Multiplier3.circom..."
 circom Multiplier3.circom --r1cs --wasm --sym -o Multiplier3_plonk
 
 # Display some information about the generated r1cs file using snarkjs
-snarkjs r1cs info Multiplier3_plonk/Multiplier3.r1cs
+npx snarkjs r1cs info Multiplier3_plonk/Multiplier3.r1cs
 
 # Start a new zkey file and make a contribution using snarkjs and the powersOfTau28_hez_final_10.ptau file
-snarkjs plonk setup Multiplier3_plonk/Multiplier3.r1cs powersOfTau28_hez_final_10.ptau Multiplier3_plonk/circuit_final.zkey
+npx snarkjs plonk setup Multiplier3_plonk/Multiplier3.r1cs powersOfTau28_hez_final_10.ptau Multiplier3_plonk/circuit_final.zkey
 
 # The --name flag specifies the name of the contributor
 # The -v flag enables verbose mode
@@ -42,10 +42,10 @@ snarkjs plonk setup Multiplier3_plonk/Multiplier3.r1cs powersOfTau28_hez_final_1
 # snarkjs zkey contribute Multiplier3_plonk/circuit_0000.zkey Multiplier3_plonk/circuit_final.zkey --name="1st Contributor Name" -v -e="random text"
 
 # Export the verification key from the final zkey file as a JSON file using snarkjs
-snarkjs zkey export verificationkey Multiplier3_plonk/circuit_final.zkey Multiplier3_plonk/verification_key.json
+npx snarkjs zkey export verificationkey Multiplier3_plonk/circuit_final.zkey Multiplier3_plonk/verification_key.json
 
 # Generate a solidity contract for verifying proofs using the final zkey file and snarkjs
-snarkjs zkey export solidityverifier Multiplier3_plonk/circuit_final.zkey ../Multiplier3Verifier_plonk.sol
+npx snarkjs zkey export solidityverifier Multiplier3_plonk/circuit_final.zkey ../Multiplier3Verifier_plonk.sol
 
 # Go back to the root directory
 cd ../..
@@ -56,24 +56,24 @@ cd contracts/circuits/Multiplier3_plonk
 echo "Create inputs for Multiplier3 circuit in Multiplier3_input.json"
 echo "{\"a\": \"3\", \"b\": \"4\", \"c\": \"5\"}" > ./Multiplier3_input.json
 
-# Calculate witness 
+# Calculate witness
 echo "Generate witness from Multiplier3_input.json, using Multiplier3.wasm, saving to Multiplier3_witness.wtns"
-gtime -f "[PROFILE] Witness generation time: %E" \
-    node Multiplier3_js/generate_witness.js Multiplier3_js/Multiplier3.wasm ./Multiplier3_input.json \
+echo "[PROFILE] Witness generation time: %E";
+    npx node Multiplier3_js/generate_witness.js Multiplier3_js/Multiplier3.wasm ./Multiplier3_input.json \
         Multiplier3_js/Multiplier3_witness.wtns
 
 # Create a proof for our witness
 echo "Starting proving that we have a witness (our Multiplier3_input.json in form of Multiplier3_witness.wtns)"
 echo "Proof and public signals are saved to Multiplier3_proof.json and Multiplier3_public.json"
-gtime -f "[PROFILE] Prove time: %E" \
-    snarkjs plonk prove ./circuit_final.zkey Multiplier3_js/Multiplier3_witness.wtns \
+echo "[PROFILE] Prove time: %E";
+    npx snarkjs plonk prove ./circuit_final.zkey Multiplier3_js/Multiplier3_witness.wtns \
         Multiplier3_js/Multiplier3_proof.json \
         Multiplier3_js/Multiplier3_public.json
 
 # Verify our proof
 echo "Checking proof of knowledge of private inputs for Multiplier3_public.json using Multiplier3_verification_key.json"
-gtime -f "[PROFILE] Verify time: %E" \
-    snarkjs plonk verify ./verification_key.json \
+echo "[PROFILE] Verify time: %E";
+    npx snarkjs plonk verify ./verification_key.json \
         Multiplier3_js/Multiplier3_public.json \
         Multiplier3_js/Multiplier3_proof.json
 
